@@ -47,3 +47,43 @@ let yLinearScale = d3.scaleLinear()
     .domain([3.5, d3.max(riskData, d => d.healthcare)])
     .range([height, 0]);
 
+//Create axis
+let xAxis = d3.axisBottom(xLinearScale);
+let yAxis = d3.axisLeft(yLinearScale);
+
+//Append axis to the chartGroup
+chartGroup.append("g")
+.attr("transform", `translate(0, ${height})`)
+.call(xAxis);
+
+chartGroup.append("g")
+.call(yAxis);
+
+//Make Circles
+let circlesGroup = chartGroup.selectAll("circle")
+    .data(riskData)
+    .enter()
+    .append("circle")
+    .attr("cx", d => xLinearScale(d.poverty))
+    .attr("cy", d => yLinearScale(d.healthcare))
+    .attr("r", 10)
+    .attr("fill", "lightblue")
+    .attr("opacity", ".6")
+    .attr("stroke-width", "1")
+    .attr("stroke", "black");
+
+    chartGroup.select("g")
+    .selectAll("circle")
+    .data(riskData)
+    .enter()
+    .append("text")
+    .text(d => d.abbr)
+    .attr("x", d => xLinearScale(d.poverty))
+    .attr("y", d => yLinearScale(d.healthcare))
+    .attr("dy",-395)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "12px")
+    .attr("fill", "black");
+ 
+    console.log(riskData);
+});
