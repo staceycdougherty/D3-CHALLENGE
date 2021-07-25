@@ -12,10 +12,9 @@ var margin = {
 var width = svgWidth - margin.left - margin.right;
 var height = svgHeight - margin.top - margin.bottom;
 
-// Create an SVG wrapper, append an SVG group that will hold our chart,
-// and shift the latter by left and top margins.
+// Create an SVG wrapper, append an SVG group that will hold our chart and shift the latter by left and top margins.
 var svg = d3
-  .select(".chart")
+  .select("#scatter")
   .append("svg")
   .attr("width", svgWidth)
   .attr("height", svgHeight);
@@ -26,10 +25,10 @@ var chartGroup = svg.append("g")
 
 //Import Data from data.csv file
 d3.csv("assets/data/data.csv")
-    .then(function(riskData){
+    .then(function(Data){
 
-//Turn strings into ints
-    riskData.forEach(function(data) {
+//Format the data
+    Data.forEach(function(data) {
         data.age = +data.age;
         data.smokes = +data.smokes;
         data.healthcare = +data.healthcare;
@@ -38,30 +37,48 @@ d3.csv("assets/data/data.csv")
         data.income = +data.income;
     });
 
-//X and Y scales
-let xLinearScale = d3.scaleLinear()
-    .domain([8.5, d3.max(riskData, d => d.poverty)])
+//create scales
+var xLinearScale = d3.scaleLinear()
+    .domain([8.5, d3.max(Data, d => d.poverty)])
     .range([0, width]);
 
-let yLinearScale = d3.scaleLinear()
-    .domain([3.5, d3.max(riskData, d => d.healthcare)])
+var yLinearScale = d3.scaleLinear()
+    .domain([3.5, d3.max(Data, d => d.healthcare)])
     .range([height, 0]);
 
-//Create axis
-let xAxis = d3.axisBottom(xLinearScale);
-let yAxis = d3.axisLeft(yLinearScale);
+//creates axes
+var bottomAxis = d3.axisBottom(xLinearScale);
+var leftAxis = d3.axisLeft(yLinearScale);
 
-//Append axis to the chartGroup
+//append the axes to the chartGroup
 chartGroup.append("g")
 .attr("transform", `translate(0, ${height})`)
-.call(xAxis);
+.call(bottomAxis);
 
 chartGroup.append("g")
-.call(yAxis);
+.call(leftAxis);
 
-//Make Circles
-let circlesGroup = chartGroup.selectAll("circle")
-    .data(riskData)
+//append text to chartGroup
+chartGroup.append("text")
+.attr("transform", `translate(${width / 2}, ${height + margin.bottom -20})`)
+.attr("text-anchor", "middle")
+.attr("font-size", "16px")
+.attr("fill", "black")
+.text("In Poverty (%)")
+.classed("active", true);
+
+
+chartGroup.append("text")
+.attr("transform", "rotate(-90)")
+.attr("x", -(height / 2))
+.attr("y", -40)
+.text("Lacks Healthcare (%)")
+.classed("active", true);
+
+
+//make Circles
+var circlesGroup = chartGroup.selectAll("circle")
+    .data(Data)
     .enter()
     .append("circle")
     .attr("cx", d => xLinearScale(d.poverty))
@@ -74,7 +91,7 @@ let circlesGroup = chartGroup.selectAll("circle")
 
     chartGroup.select("g")
     .selectAll("circle")
-    .data(riskData)
+    .data(Data)
     .enter()
     .append("text")
     .text(d => d.abbr)
@@ -85,5 +102,5 @@ let circlesGroup = chartGroup.selectAll("circle")
     .attr("font-size", "12px")
     .attr("fill", "black");
  
-    console.log(riskData);
+    console.log(Data);
 });
